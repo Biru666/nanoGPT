@@ -166,11 +166,12 @@ with torch.no_grad():
                 # Fast generation for remaining tokens
                 if max_new_tokens > num_probs_to_show:
                     remaining_tokens = max_new_tokens - num_probs_to_show
-                    y_remaining = model.generate(x_gen, remaining_tokens, temperature=temperature, top_k=top_k)
+                    y_remaining, y_remaining_probs = model.generate(x_gen, remaining_tokens, temperature=temperature, top_k=top_k)
                     all_selected_tokens.extend(y_remaining[0, x_gen.shape[1]:].tolist())
                 
                 print(decode(all_selected_tokens))
             else:
-                y = model.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
+                y, y_probs = model.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
                 print(decode(y[0].tolist()))
+                print(f"Response probability: {y_probs.item():.12e}")
                 print('---------------')
