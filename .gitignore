@@ -7,6 +7,7 @@ __pycache__/
 *.pkl
 *.pt
 *.pyc
+probs_sample*
 input.txt
 env/
 venv/
