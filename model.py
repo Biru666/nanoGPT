@@ -303,41 +303,19 @@ class GPT(nn.Module):
         return mfu
 
     @torch.no_grad()
-    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None, fixed_response=None):
+    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
         """
         Take a conditioning sequence of indices idx (LongTensor of shape (b,t)) and complete
         the sequence max_new_tokens times, feeding the predictions back into the model each time.
-        Returns the completed sequence and the probability of the generated response for each
-        batch item.
         Most likely you'll want to make sure to be in model.eval() mode of operation for this.
         """
-        if fixed_response is not None:
-            # if a fixed response is provided, calculate P(fixed_response | idx)
-            if fixed_response.dim() == 1:
-                fixed_response = fixed_response.unsqueeze(0) # add batch dimension if needed
-            full_idx = torch.cat((idx, fixed_response), dim=1) # concatenate conditioning and response
-            # Calculate the log probability of the fixed response
-            response_start = idx.size(1)
-            if full_idx.size(1) > self.config.block_size:
-                full_idx = full_idx[:, -self.config.block_size:] # crop to block size if needed
-                response_start = min(response_start, self.config.block_size) # adjust response start if cropping occurred
-            logits, _ = self(full_idx)
-            logits = logits[:, response_start-1:-1, :].double() / temperature # get logits for response tokens
-            targets = fixed_response  
-            if top_k is not None:
-                v, _ = torch.topk(logits, min(top_k, logits.size(-1)), dim=-1)
-                logits[logits < v[:, :, [-1]]] = -float('Inf')
-            log_probs = F.log_softmax(logits, dim=-1).gather(2, targets.unsqueeze(-1)).squeeze(-1).sum(dim=1)
-            return full_idx, torch.exp(log_probs)  
-        else:
-            log_probs = torch.zeros(idx.size(0), device=idx.device, dtype=torch.float64)
-            for _ in range(max_new_tokens):
-                # if the sequence context is growing too long we must crop it at block_size
-                idx_cond = idx if idx.size(1) <= self.config.block_size else idx[:, -self.config.block_size:]
+        for _ in range(max_new_tokens):
+            # if the sequence context is growing too long we must crop it at block_size
+            idx_cond = idx if idx.size(1) <= self.config.block_size else idx[:, -self.config.block_size:]
             # forward the model to get the logits for the index in the sequence
             logits, _ = self(idx_cond)
             # pluck the logits at the final step and scale by desired temperature
-            logits = logits[:, -1, :].double() / temperature
+            logits = logits[:, -1, :] / temperature
             # optionally crop the logits to only the top k options
             if top_k is not None:
                 v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
@@ -346,9 +324,7 @@ class GPT(nn.Module):
             probs = F.softmax(logits, dim=-1)
             # sample from the distribution
             idx_next = torch.multinomial(probs, num_samples=1)
-            # track the probability of the sampled token under the same distribution
-            token_log_probs = F.log_softmax(logits, dim=-1).gather(1, idx_next).squeeze(1)
-            log_probs += token_log_probs
             # append sampled index to the running sequence and continue
             idx = torch.cat((idx, idx_next), dim=1)
-            return idx, torch.exp(log_probs)
+
+        return idx
