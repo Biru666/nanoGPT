@@ -1,7 +1,7 @@
 [
   {
     "prompt": "A healthy adult dog should be fed",
-    "response": " measured balanced meals"
+    "response": " measured balanced meals and"
   },
   {
     "prompt": "Fresh water is important for dogs because",
@@ -14,10 +14,6 @@
   {
     "prompt": "A dog should not eat chocolate because",
     "response": " it can be toxic"
-  },
-  {
-    "prompt": "The amount of food a dog needs depends on",
-    "response": " age, size, and activity"
   },
   {
     "prompt": "A good feeding routine for most adult dogs includes",
@@ -36,20 +32,12 @@
     "response": " they add extra calories"
   },
   {
-    "prompt": "After feeding a dog, it is best to",
-    "response": " let it rest"
-  },
-  {
     "prompt": "A puppy needs food that is different from adult dog food because",
     "response": " it is still growing"
   },
   {
     "prompt": "Young puppies usually need to eat",
     "response": " several small meals"
-  },
-  {
-    "prompt": "Puppy food should be chosen based on",
-    "response": " age and adult size"
   },
   {
     "prompt": "A puppy should not be switched to adult food too early because",
@@ -70,10 +58,6 @@
   {
     "prompt": "If a puppy refuses food for more than a short time, the owner should",
     "response": " contact a vet"
-  },
-  {
-    "prompt": "Training treats for puppies should be",
-    "response": " small and soft"
   },
   {
     "prompt": "Large-breed puppies need careful feeding because",
@@ -100,16 +84,8 @@
     "response": " boredom causes stress"
   },
   {
-    "prompt": "A comfortable sleeping area for a dog should be",
-    "response": " clean and quiet"
-  },
-  {
     "prompt": "Cold weather can be dangerous for some dogs because",
     "response": " they may lose heat"
-  },
-  {
-    "prompt": "A dog-friendly indoor space should avoid",
-    "response": " toxic foods and cords"
   },
   {
     "prompt": "A good environment for a nervous dog should be",
@@ -120,20 +96,12 @@
     "response": " they explore and exercise"
   },
   {
-    "prompt": "A wagging tail can mean",
-    "response": " excitement or uncertainty"
-  },
-  {
     "prompt": "When a dog lowers its body and tucks its tail, it may be showing",
     "response": " fear or stress"
   },
   {
     "prompt": "A relaxed dog often has",
-    "response": " soft eyes"
-  },
-  {
-    "prompt": "Growling is important because",
-    "response": " it is a warning"
+    "response": " soft eyes and"
   },
   {
     "prompt": "If a dog shows its teeth with a stiff body, the safest response is to",
@@ -142,10 +110,6 @@
   {
     "prompt": "A dog licking its lips when no food is present may be",
     "response": " stressed or unsure"
-  },
-  {
-    "prompt": "Yawning in dogs can sometimes mean",
-    "response": " stress or tiredness"
   },
   {
     "prompt": "When a dog puts its front legs down and rear up, it is often",
@@ -160,14 +124,6 @@
     "response": " the dog needs something"
   },
   {
-    "prompt": "A dog that chews furniture may need",
-    "response": " exercise or chew toys"
-  },
-  {
-    "prompt": "If a dog pants heavily while resting in warm weather, it may be",
-    "response": " too hot"
-  },
-  {
     "prompt": "A dog that guards its food may be showing",
     "response": " resource guarding"
   },
@@ -176,24 +132,8 @@
     "response": " calm routines"
   },
   {
-    "prompt": "If a dog eats too quickly, an owner can",
-    "response": " use a slow feeder"
-  },
-  {
-    "prompt": "Dogs should avoid cooked bones because",
-    "response": " they can splinter"
-  },
-  {
-    "prompt": "A healthy dog diet should include",
-    "response": " complete dog food"
-  },
-  {
     "prompt": "A puppy learning to eat on a schedule should be given",
     "response": " regular meal times"
-  },
-  {
-    "prompt": "A stressed dog may communicate by",
-    "response": " pacing or panting"
   },
   {
     "prompt": "The best way to understand dog behavior is to",
