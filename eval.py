@@ -22,7 +22,7 @@ init_from = 'resume' # either 'resume' (from an out_dir) or a gpt2 variant (e.g.
 out_dir = 'out' # ignored if init_from is not 'resume'
 start = "\n" # kept for argument compatibility with sample1_3.py
 num_samples = 10 # kept for argument compatibility with sample1_3.py
-max_new_tokens = 500 # kept for argument compatibility with sample1_3.py
+max_new_tokens = 128 # kept for argument compatibility with sample1_3.py
 temperature = 0.8 # 1.0 = no change, < 1.0 = less random, > 1.0 = more random
 top_k = 200 # retain only the top_k most likely tokens, clamp others to have 0 probability
 seed = 1337
@@ -49,7 +49,6 @@ def score_response(model, prompt_ids, fixed_response_ids, temperature=1.0, top_k
     x = torch.tensor(prompt_ids, dtype=torch.long, device=device)[None, ...]
     fixed_response = torch.tensor(fixed_response_ids, dtype=torch.long, device=device)[None, ...]
 
-    # Force the response through generate, then score exactly those response tokens.
     full_idx = model.generate(
         x,
         max_new_tokens,
@@ -58,24 +57,35 @@ def score_response(model, prompt_ids, fixed_response_ids, temperature=1.0, top_k
         fixed_response=fixed_response,
     )
 
-    if len(fixed_response_ids) == 0:
-        return 0.0
+    if max_new_tokens == 0:
+        return full_idx, 0.0
 
-    response_start = x.size(1)
-    if full_idx.size(1) > model.config.block_size:
-        overflow = full_idx.size(1) - model.config.block_size
-        full_idx = full_idx[:, -model.config.block_size:]
-        response_start = max(response_start - overflow, 0)
-        fixed_response_ids = fixed_response_ids[max(overflow - x.size(1), 0):]
+    log_prob = torch.zeros(1, device=device, dtype=torch.float64)
+    response_start = len(prompt_ids)
+    full_ids = full_idx[0].tolist()
 
-    logits, _ = model(full_idx, targets=full_idx)
-    score_start = max(response_start, 1)
-    logits = logits[:, score_start - 1:-1, :].double() / temperature
-    targets = torch.tensor(fixed_response_ids, dtype=torch.long, device=device)[None, :]
-    targets = targets[:, score_start - response_start:]
+    for target_pos in range(response_start, len(full_ids)):
+        if target_pos == 0:
+            raise ValueError("Cannot score the first response token without any prompt/context token.")
 
-    probs = F.softmax(logits, dim=-1).gather(2, targets.unsqueeze(-1)).squeeze(-1)
-    return full_idx, probs.sum(dim=1).item()
+        context_start = max(0, target_pos - model.config.block_size)
+        context_ids = full_ids[context_start:target_pos]
+        context = torch.tensor(context_ids, dtype=torch.long, device=device)[None, ...]
+
+        logits, _ = model(context)
+        logits = logits[:, -1, :].double() / temperature
+
+        # if top_k is not None:
+        #     v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+        #     logits[logits < v[:, [-1]]] = -float('Inf')
+
+        target = torch.tensor([full_ids[target_pos]], dtype=torch.long, device=device)
+        token_log_prob = F.log_softmax(logits, dim=-1).gather(1, target[:, None]).squeeze(1)
+        log_prob += token_log_prob
+
+    return full_idx, torch.exp(log_prob).item()
+
+
 
 
 def eval(data_file):
@@ -144,9 +154,9 @@ def eval(data_file):
                     device=device,
                 )
                 print(f"Prompt: {prompt}")
-                print(f"Response: {response}")
-                print(f"Model output: {decode(full_idx[0].tolist())}")
-                print(f"Response Probability: {summed_probability:.12e}")
+                print(f"Response: {decode(full_idx[0, len(prompt_ids):].tolist())}")
+                # print(f"Model output: {decode(full_idx[0].tolist())}")
+                print(f"Response Probability: {summed_probability:.8e}")
                 print('---------------')
 
 

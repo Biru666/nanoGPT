@@ -21,7 +21,7 @@ top_k = 200 # retain only the top_k most likely tokens, clamp others to have 0 p
 show_probs = False # whether to show probability distribution charts for generated tokens
 num_probs_to_show = 5 # number of initial tokens to visualize (for speed optimization)
 seed = 1337
-device = 'cuda' # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1', etc.
+device = 'cpu' # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1', etc.
 dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16' # 'float32' or 'bfloat16' or 'float16'
 compile = False # use PyTorch 2.0 to compile the model to be faster
 exec(open('configurator.py').read()) # overrides from command line or config file
@@ -122,7 +122,7 @@ def draw_chart(top_probs, top_indices, selected_token_idx, decode_fn, sample_idx
     # Save the chart
     filename = f'probs_sample{sample_idx+1}_token{token_idx+1}.png'
     plt.savefig(filename, dpi=150, bbox_inches='tight')
-    print(f"Chart saved as '{filename}'")
+    # print(f"Chart saved as '{filename}'")
     
     plt.show()
     plt.close()
@@ -136,7 +136,7 @@ with torch.no_grad():
                 x_gen = x.clone()
                 all_selected_tokens = []
                 
-                for token_idx in range(max_new_tokens):
+                for token_idx in range(num_probs_to_show):
                     # Forward pass
                     logits, _ = model(x_gen)
                     logits = logits[0, -1, :] / temperature
@@ -169,7 +169,8 @@ with torch.no_grad():
                     y_remaining = model.generate(x_gen, remaining_tokens, temperature=temperature, top_k=top_k)
                     all_selected_tokens.extend(y_remaining[0, x_gen.shape[1]:].tolist())
                 
-                print(decode(all_selected_tokens))
+                print(decode(start_ids + all_selected_tokens))
+                print('---------------')
             else:
                 y = model.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
                 print(decode(y[0].tolist()))

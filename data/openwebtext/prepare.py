@@ -37,11 +37,12 @@ if __name__ == '__main__':
         return out
 
     # tokenize the dataset
+    map_num_proc = min(num_proc, max(1, min(len(split_dataset['train']), len(split_dataset['val']))))
     tokenized = split_dataset.map(
         process,
         remove_columns=['text'],
         desc="tokenizing the splits",
-        num_proc=num_proc,
+        num_proc=map_num_proc,
     )
 
     # concatenate all the ids in each dataset into one large file we can use for training
@@ -50,7 +51,7 @@ if __name__ == '__main__':
         filename = os.path.join(os.path.dirname(__file__), f'{split}.bin')
         dtype = np.uint16 # (can do since enc.max_token_value == 50256 is < 2**16)
         arr = np.memmap(filename, dtype=dtype, mode='w+', shape=(arr_len,))
-        total_batches = 1024
+        total_batches = min(1024, len(dset))
 
         idx = 0
         for batch_idx in tqdm(range(total_batches), desc=f'writing {filename}'):
